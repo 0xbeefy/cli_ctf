@@ -1,4 +1,6 @@
+CFLAGS += -lsqlite3
+
 all: ctf
 
 ctf: main.c
-	gcc -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
