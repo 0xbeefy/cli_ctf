@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
 	char currentMainStory[300] = {0};
 	char id[100] = {0};
 	char flag[100] = {0};
+	char solvers[100] = {0};
+	char mainStory[100] = {0};
 	if (getcwd(cwd, sizeof(cwd)) == NULL) {
 		printf("Error getting current working directory\n");
 		return 1;
@@ -40,7 +42,7 @@ int main(int argc, char** argv) {
 	while (1) {
 		CLEAR
 		printf("Input a number from the menu:\n");
-		printf("1) Add new challenge\n2) Change flag of challenge (by ID)\n3) Change solvers number of challenge (by ID)\n4) Change main story of challenge (by id)\n");
+		printf("1) Add new challenge\n2) List all challenges\n3) Change flag of challenge (by ID)\n4) Change solvers number of challenge (by ID)\n4) Change main story of challenge (by id)\n");
 		printf("CTF> ");
 		fgets(command, 100, stdin);
 		command[strcspn(command, "\n")] = 0;
@@ -58,7 +60,7 @@ int main(int argc, char** argv) {
 
 			sprintf(newQuery, "INSERT INTO ctfs (flag, solvers, main_story)"
 					  "VALUES ('%s', %d, '%s');", currentFlag, (int) strtol(currentSolvers, (char **)NULL, 10), currentMainStory);
-		} else if ( strcmp(command, "2") == 0 ) {
+		} else if ( strcmp(command, "3") == 0 ) {
 			printf("ID of challenge to change: ");
 			fgets(id, 100, stdin);
 			id[strcspn(id, "\n")] = 0;
@@ -66,6 +68,20 @@ int main(int argc, char** argv) {
 			fgets(flag, 100, stdin);
 			flag[strcspn(flag, "\n")] = 0;
 			updateFlagById(flag, (int) strtol(id, (char **)NULL, 10));
+		} else if ( strcmp(command, "4") == 0 ) {
+			printf("ID of challenge to change: ");
+			fgets(id, 100, stdin);
+			id[strcspn(id, "\n")] = 0;
+			printf("New solvers number: ");
+			fgets(solvers, 100, stdin);
+			updateSolversById((int) strtol(solvers, (char **)NULL, 10), (int) strtol(id, (char **)NULL, 10));
+		} else if ( strcmp(command, "5") == 0 ) {
+			printf("ID of challenge to change: ");
+			fgets(id, 100, stdin);
+			id[strcspn(id, "\n")] = 0;
+			printf("New main story: ");
+			fgets(mainStory, 100, stdin);
+			updateMainStoryById(mainStory, (int) strtol(id, (char **)NULL, 10));
 		}
 		int rc = sqlite3_exec(ppDb, newQuery, NULL, 0, &errorMessage);
 		if (rc != SQLITE_OK) {
