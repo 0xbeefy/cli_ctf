@@ -9,6 +9,14 @@ sqlite3* ppDb;
 #define FALSE 0
 #define TRUE 1
 
+typedef struct ctf{
+	int id;
+	char* flag;
+	int solvers;
+	char* main_story;
+}ctf;
+
+struct ctf ReturnCtf(int id);
 int updateMainStoryById(const char* main_story, int id);
 int updateFlagById(const char* flag, int id);
 int openDBFile(const char* filename, const char* path);
@@ -105,4 +113,36 @@ int TableMaker(){
 	}
 	return 0;
 	
+}
+
+
+struct ctf ReturnCtf(int id){
+	struct ctf result;
+	
+	char query[MAX_LENGTH];
+
+    sprintf(query, "SELECT flag, solvers, main_story"
+				   "FROM ctfs"
+                   "WHERE id = %d; ", id);
+	
+
+
+	sqlite3_stmt* stmt;
+	int rc = sqlite3_prepare_v2(ppDb, query, -1, &stmt, NULL);
+
+	if (rc != SQLITE_OK) {
+		printf("Error preparing query: %s \n", sqlite3_errmsg(ppDb));
+		return result;
+	}
+	
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		result.id = sqlite3_column_int(stmt, 0);
+		strcpy(result.flag, (const char*)(sqlite3_column_text(stmt, 1)));
+		result.solvers = sqlite3_column_int(stmt, 2);	
+		strcpy(result.main_story, (const char*)(sqlite3_column_text(stmt, 3)));
+		
+	}
+
+	sqlite3_finalize(stmt);
+	return result;
 }
