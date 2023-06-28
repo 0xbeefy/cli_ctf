@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 	}
 	openDBFile("db.sql", cwd);
 	while (1) {
-		CLEAR
+		/* CLEAR */
 		printf("Input a number from the menu:\n");
 		printf("1) Add new challenge\n2) List all challenges\n3) Change flag of challenge (by ID)\n4) Change solvers number of challenge (by ID)\n4) Change main story of challenge (by id)\n");
 		printf("CTF> ");
