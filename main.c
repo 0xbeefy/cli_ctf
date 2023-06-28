@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <sqlite3.h>
+#include <string.h>
+#include <unistd.h>
 
 sqlite3* ppDb;
 
@@ -13,16 +15,16 @@ int openDBFile(const char* filename, const char* path);
 int TableMaker();
 
 int main(int argc, char** argv) {
-	printf("DEBUG: Sqlite3 version: %s", sqlite3_libversion());
+	printf("DEBUG: Sqlite3 version: %s\n", sqlite3_libversion());
 	return 0;
 }
 
 int updateFlagById(const char* flag, int id){
 	
  	char query[MAX_LENGTH];
-    sprintf(query, "UPDATE ctfs "
-                   "SET flag = '%s' "
-                   "WHERE id = %d; ", flag, id);
+	sprintf(query, "UPDATE ctfs "
+    		       "SET flag = '%s' "
+    		       "WHERE id = %d; ", flag, id);
 
 
 
@@ -31,9 +33,9 @@ int updateFlagById(const char* flag, int id){
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
 	if (rc != SQLITE_OK) {
 		printf("Error preparing query: %s \n", errorMessage);
-		return FALSE;
+		return 1;
 	}
-	return TRUE;
+	return 0;
 	
 
 }
@@ -53,9 +55,9 @@ int updateMainStoryById(const char* main_story, int id){
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
 	if (rc != SQLITE_OK) {
 		printf("Error preparing query: %s \n", errorMessage);
-		return FALSE;
+		return 1;
 	}
-	return TRUE;
+	return 0;
 	
 
 }
@@ -69,19 +71,21 @@ int openDBFile(const char* filename, const char* path) {
 
 	strcpy(fullPath, path);
 	strcat(fullPath, filename);
+	// Example: filename=test.sql, path=/home/example/, result: filename=/home/example/test.sql
 
-	int fileExist = _access(fullPath, 0);
+	int fileExist = access(fullPath, 0);
 	int sqlite3Result = sqlite3_open(fullPath, &ppDb);
 	if (sqlite3Result != SQLITE_OK) {
 		ppDb = NULL;
 		printf("Failed to open DB\n");
 		
-		return FALSE;
+		return 1;
 	}
 	if (fileExist != 0) {
 		return TableMaker();
 	}
 	sqlite3_open(fullPath, &ppDb); // for the possibility that its open and neither
+	return 0;
 }
 
 int TableMaker(){
@@ -97,8 +101,8 @@ int TableMaker(){
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
 	if (rc != SQLITE_OK) {
 		printf("Error creating table: %s \n", errorMessage);
-		return FALSE;
+		return 1;
 	}
-	return TRUE;
+	return 0;
 	
 }
