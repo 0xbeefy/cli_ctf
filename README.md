@@ -4,6 +4,7 @@
 
 What does a CTF has, in terms of data to store:
 
+* *user interface*
 * Flags
 * Users
 * Passwords
