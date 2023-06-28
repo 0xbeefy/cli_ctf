@@ -8,6 +8,7 @@ sqlite3* ppDb;
 #define MAX_LENGTH 1024
 #define FALSE 0
 #define TRUE 1
+#define PATH_MAX 200
 
 int updateMainStoryById(const char* main_story, int id);
 int updateFlagById(const char* flag, int id);
@@ -15,7 +16,10 @@ int openDBFile(const char* filename, const char* path);
 int TableMaker();
 
 int main(int argc, char** argv) {
+	char cwd[PATH_MAX];
 	printf("DEBUG: Sqlite3 version: %s\n", sqlite3_libversion());
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+		printf("DEBUG: Current path: %s\n", cwd);
 	return 0;
 }
 
@@ -68,8 +72,10 @@ int updateMainStoryById(const char* main_story, int id){
 int openDBFile(const char* filename, const char* path) {
 
 	char fullPath[100];
+	char slash = '/';
 
 	strcpy(fullPath, path);
+	fullPath[strlen(fullPath) + 1] = '/';
 	strcat(fullPath, filename);
 	// Example: filename=test.sql, path=/home/example/, result: filename=/home/example/test.sql
 
