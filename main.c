@@ -15,6 +15,14 @@ sqlite3* ppDb;
 #define PATH_MAX 200
 #define CLEAR printf("\e[1;1H\e[2J");
 
+typedef struct ctf{
+	int id;
+	char* flag;
+	int solvers;
+	char* main_story;
+}ctf;
+
+struct ctf ReturnCtf(int id);
 int updateMainStoryById(const char* main_story, int id);
 int updateFlagById(const char* flag, int id);
 int updateSolversById(int solvers, int id);
@@ -203,4 +211,35 @@ int TableMaker(){
 	printf("DEBUG: Created TABLE ctfs\n");
 	return 0;
 	
+}
+
+
+struct ctf returnCtf(int id) {
+	struct ctf result;
+	
+	char query[MAX_LENGTH];
+
+	sprintf(query, "SELECT flag, solvers, main_story"
+		       "FROM ctfs"
+		       "WHERE id = %d;", id);
+	
+
+
+	sqlite3_stmt* stmt;
+	int rc = sqlite3_prepare_v2(ppDb, query, -1, &stmt, NULL);
+
+	if (rc != SQLITE_OK) {
+		printf("Error preparing query: %s \n", sqlite3_errmsg(ppDb));
+		return result;
+	}
+	
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		result.id = id;
+		strcpy(result.flag, (char*)(sqlite3_column_text(stmt, 0)));
+		result.solvers = sqlite3_column_int(stmt, 1);
+		strcpy(result.main_story, (char*)(sqlite3_column_text(stmt, 2)));
+	}
+
+	sqlite3_finalize(stmt);
+	return result;
 }
