@@ -116,14 +116,14 @@ int TableMaker(){
 }
 
 
-struct ctf ReturnCtf(int id){
+struct ctf returnCtf(int id) {
 	struct ctf result;
 	
 	char query[MAX_LENGTH];
 
-    sprintf(query, "SELECT flag, solvers, main_story"
-				   "FROM ctfs"
-                   "WHERE id = %d; ", id);
+	sprintf(query, "SELECT flag, solvers, main_story"
+		       "FROM ctfs"
+		       "WHERE id = %d;", id);
 	
 
 
@@ -136,11 +136,10 @@ struct ctf ReturnCtf(int id){
 	}
 	
 	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		result.id = sqlite3_column_int(stmt, 0);
-		strcpy(result.flag, (const char*)(sqlite3_column_text(stmt, 1)));
-		result.solvers = sqlite3_column_int(stmt, 2);	
-		strcpy(result.main_story, (const char*)(sqlite3_column_text(stmt, 3)));
-		
+		result.id = id;
+		strcpy(result.flag, (char*)(sqlite3_column_text(stmt, 0)));
+		result.solvers = sqlite3_column_int(stmt, 1);
+		strcpy(result.main_story, (char*)(sqlite3_column_text(stmt, 2)));
 	}
 
 	sqlite3_finalize(stmt);
