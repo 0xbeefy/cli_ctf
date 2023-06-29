@@ -30,6 +30,7 @@ int updateFlagById(const char* flag, int id);
 int updateSolversById(int solvers, int id);
 int openDBFile(const char* filename, const char* path);
 int deleteChallengeById(int id);
+int resetIds();
 int TableMaker();
 
 int main(int argc, char** argv) {
@@ -111,6 +112,7 @@ int main(int argc, char** argv) {
 				count = sqlite3_column_int(stmt, 0);
 
 			sqlite3_finalize(stmt);
+			resetIds();
 			for ( int i = 1; i <= count; i++ ) {
 				struct ctf currentCtf = returnCtf(i);
 				printf("Challenge ID: %d, Name: %s\nFlag: %s\nNumber of solvers: %d\nChallenge main story: %s\n\n", currentCtf.id, currentCtf.name, currentCtf.flag, currentCtf.solvers, currentCtf.main_story);
@@ -327,4 +329,18 @@ struct ctf returnCtf(int id) {
 
 	sqlite3_finalize(stmt);
 	return result;
+}
+
+
+int resetIds() {
+	char query[MAX_LENGTH];
+	char* errorMessage;
+
+	sprintf(query, "UPDATE SQLITE_SEQUENCE SET SEQ= 'id' WHERE NAME='ctfs';");
+	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
+	if ( rc != SQLITE_OK ) {
+		printf("Error preparing query: %s \n", sqlite3_errmsg(ppDb));
+		return 1;
+	}
+	return 0;
 }
