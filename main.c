@@ -20,9 +20,11 @@ typedef struct ctf {
 	char flag[100];
 	int solvers;
 	char main_story[100];
+	char name[100];
 }ctf;
 
 struct ctf returnCtf(int id);
+int updateNameById(const char* name, int id);
 int updateMainStoryById(const char* main_story, int id);
 int updateFlagById(const char* flag, int id);
 int updateSolversById(int solvers, int id);
@@ -39,10 +41,13 @@ int main(int argc, char** argv) {
 	char currentFlag[100] = {0};
 	char currentSolvers[100] = {0};
 	char currentMainStory[300] = {0};
+	char currentName[100] = {0};
+
 	char id[100] = {0};
 	char flag[100] = {0};
 	char solvers[100] = {0};
 	char mainStory[100] = {0};
+	char name[100] = {0};
 
 	int count;
 	if ( getcwd(cwd, sizeof(cwd)) == NULL ) {
@@ -53,24 +58,32 @@ int main(int argc, char** argv) {
 	while (1) {
 		/* CLEAR */
 		printf("Input a number from the menu:\n");
-		printf("1) Add new challenge\n2) Delete challenge (by ID)\n3) List all challenges\n4) Change flag of challenge (by ID)\n5) Change solvers number of challenge (by ID)\n6) Change main story of challenge (by id)\n");
+		printf("1) Add new challenge\n2) Delete challenge (by ID)\n3) List all challenges\n4) Change name of challenge (by ID) 5) Change flag of challenge (by ID)\n6) Change solvers number of challenge (by ID)\n7) Change main story of challenge (by id)\n");
 		printf("CTF> ");
 		fgets(command, 100, stdin);
 		command[strcspn(command, "\n")] = 0;
 		if ( strcmp(command, "1") == 0 ) {
 			printf("Creating a new challenge.\n");
+
+			printf("Challenge name: ");
+			fgets(currentName, 100, stdin);
+
 			printf("Challenge current flag (can leave blank): ");
 			fgets(currentFlag, 100, stdin);
-			currentFlag[strcspn(currentFlag, "\n")] = 0;
+
 			printf("Challenge current solvers (int) (can leave blank): ");
 			fgets(currentSolvers, 100, stdin);
-			currentSolvers[strcspn(currentSolvers, "\n")] = 0;
+
 			printf("Challenge current main story (can leave blank): ");
 			fgets(currentMainStory, 100, stdin);
+
+			currentName[strcspn(currentName, "\n")] = 0;
+			currentFlag[strcspn(currentFlag, "\n")] = 0;
+			currentSolvers[strcspn(currentSolvers, "\n")] = 0;
 			currentMainStory[strcspn(currentMainStory, "\n")] = 0;
 
-			sprintf(newQuery, "INSERT INTO ctfs (flag, solvers, main_story)"
-					  "VALUES ('%s', %d, '%s');", currentFlag, (int) strtol(currentSolvers, (char **)NULL, 10), currentMainStory);
+			sprintf(newQuery, "INSERT INTO ctfs (name, flag, solvers, main_story)"
+					  "VALUES ('%s', '%s', %d, '%s');", currentName, currentFlag, (int) strtol(currentSolvers, (char **)NULL, 10), currentMainStory);
 		} else if ( strcmp(command, "2") == 0 ) {
 			char id[100] = {0};
 			char yn[100] = {0};
@@ -100,9 +113,18 @@ int main(int argc, char** argv) {
 			sqlite3_finalize(stmt);
 			for ( int i = 1; i <= count; i++ ) {
 				struct ctf currentCtf = returnCtf(i);
-				printf("Challenge ID: %d\nFlag: %s\nNumber of solvers: %d\nChallenge main story: %s\n\n", currentCtf.id, currentCtf.flag, currentCtf.solvers, currentCtf.main_story);
+				printf("Challenge ID: %d, Name: %s\nFlag: %s\nNumber of solvers: %d\nChallenge main story: %s\n\n", currentCtf.id, currentCtf.name, currentCtf.flag, currentCtf.solvers, currentCtf.main_story);
 			}
 		} else if ( strcmp(command, "4") == 0 ) {
+			printf("ID of challenge to change: ");
+			fgets(id, 100, stdin);
+			id[strcspn(id, "\n")] = 0;
+			printf("New name: ");
+			fgets(name, 100, stdin);
+			name[strcspn(name, "\n")] = 0;
+
+			updateNameById(name, (int) strtol(id, (char **)NULL, 10));
+		} else if ( strcmp(command, "5") == 0 ) {
 			printf("ID of challenge to change: ");
 			fgets(id, 100, stdin);
 			id[strcspn(id, "\n")] = 0;
@@ -110,14 +132,14 @@ int main(int argc, char** argv) {
 			fgets(flag, 100, stdin);
 			flag[strcspn(flag, "\n")] = 0;
 			updateFlagById(flag, (int) strtol(id, (char **)NULL, 10));
-		} else if ( strcmp(command, "5") == 0 ) {
+		} else if ( strcmp(command, "6") == 0 ) {
 			printf("ID of challenge to change: ");
 			fgets(id, 100, stdin);
 			id[strcspn(id, "\n")] = 0;
 			printf("New solvers number: ");
 			fgets(solvers, 100, stdin);
 			updateSolversById((int) strtol(solvers, (char **)NULL, 10), (int) strtol(id, (char **)NULL, 10));
-		} else if ( strcmp(command, "6") == 0 ) {
+		} else if ( strcmp(command, "7") == 0 ) {
 			printf("ID of challenge to change: ");
 			fgets(id, 100, stdin);
 			id[strcspn(id, "\n")] = 0;
@@ -127,6 +149,7 @@ int main(int argc, char** argv) {
 		}
 		int rc = sqlite3_exec(ppDb, newQuery, NULL, 0, &errorMessage);
 		if ( rc != SQLITE_OK ) {
+			printf("Error happened in main\n");
 			printf("Error preparing query: %s \n", errorMessage);
 			return 1;
 		}
@@ -136,6 +159,21 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+int updateNameById(const char* name, int id) {
+	char query[MAX_LENGTH];
+	sprintf(query, "UPDATE ctfs "
+		       "SET name = '%s' "
+		       "WHERE id = %d; ", name, id);
+
+	char* errorMessage;
+
+	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
+	if ( rc != SQLITE_OK ) {
+		printf("Error preparing query: %s \n", errorMessage);
+		return 1;
+	}
+	return 0;
+}
 int updateFlagById(const char* flag, int id) {
 	
  	char query[MAX_LENGTH];
@@ -231,6 +269,7 @@ int TableMaker() {
 	const char* query = 
 		"CREATE TABLE IF NOT EXISTS ctfs ("
 		"id INTEGER PRIMARY KEY AUTOINCREMENT,"
+		"name TEXT,"
 		"flag TEXT,"
 		"solvers INTEGER,"
 		"main_story TEXT );";
@@ -264,7 +303,7 @@ struct ctf returnCtf(int id) {
 	
 	char query[MAX_LENGTH];
 
-	sprintf(query, "SELECT flag, solvers, main_story "
+	sprintf(query, "SELECT name, flag, solvers, main_story "
 		       "FROM ctfs "
 		       "WHERE id = %d;", id);
 	
@@ -280,9 +319,10 @@ struct ctf returnCtf(int id) {
 	
 	if ( sqlite3_step(stmt) == SQLITE_ROW ) {
 		result.id = id;
-		strcpy(result.flag, (char*)(sqlite3_column_text(stmt, 0)));
-		result.solvers = sqlite3_column_int(stmt, 1);
-		strcpy(result.main_story, (char*)(sqlite3_column_text(stmt, 2)));
+		strcpy(result.name, (char*)(sqlite3_column_text(stmt, 0)));
+		strcpy(result.flag, (char*)(sqlite3_column_text(stmt, 1)));
+		result.solvers = sqlite3_column_int(stmt, 2);
+		strcpy(result.main_story, (char*)(sqlite3_column_text(stmt, 3)));
 	}
 
 	sqlite3_finalize(stmt);
