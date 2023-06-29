@@ -4,14 +4,14 @@
 
 What does a CTF has, in terms of data to store:
 
-* *user interface*
-* Flags
-* Users
-* Passwords
-* IPs, addresses
-* Main story
-* Commands to run
-* Changes, refactors, debugs etc.
+* [X] *user interface*
+* [X] Flags
+* [ ] Users
+* [ ] Passwords
+* [ ] IPs, addresses
+* [X] Main story
+* [ ] Commands to run
+* [ ] Changes, refactors, debugs etc.
 
 What do we need to do:
 
