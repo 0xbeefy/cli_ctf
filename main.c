@@ -15,7 +15,7 @@ sqlite3* ppDb;
 #define PATH_MAX 200
 #define CLEAR printf("\e[1;1H\e[2J");
 
-typedef struct ctf{
+typedef struct ctf {
 	int id;
 	char flag[100];
 	int solvers;
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 	char mainStory[100] = {0};
 
 	int count;
-	if (getcwd(cwd, sizeof(cwd)) == NULL) {
+	if ( getcwd(cwd, sizeof(cwd)) == NULL ) {
 		printf("Error getting current working directory\n");
 		return 1;
 	}
@@ -79,25 +79,24 @@ int main(int argc, char** argv) {
 			fgets(id, 100, stdin);
 			printf("Are you sure? [y/n]: ");
 			fgets(yn, 100, stdin);
-			for ( int i = 0; yn[i]; i++ ) {
+			for ( int i = 0; yn[i]; i++ )
 				yn[i] = tolower(yn[i]);
-			}
+
 			yn[strcspn(yn, "\n")] = 0;
-			if ( strcmp(yn, "y") == 0 ) {
+			if ( strcmp(yn, "y") == 0 )
 				deleteChallengeById((int) strtol(id, (char**)NULL, 10));
-			}
+
 		} else if ( strcmp(command, "3") == 0 ) {
 			sprintf(newQuery, "SELECT COUNT(id) FROM ctfs;");
 			sqlite3_stmt* stmt;
 			int rc = sqlite3_prepare_v2(ppDb, newQuery, -1, &stmt, NULL);
 
-			if (rc != SQLITE_OK) {
+			if ( rc != SQLITE_OK )
 				printf("Error preparing query: %s \n", sqlite3_errmsg(ppDb));
-			}
 
-			if (sqlite3_step(stmt) == SQLITE_ROW) {
+			if ( sqlite3_step(stmt) == SQLITE_ROW )
 				count = sqlite3_column_int(stmt, 0);
-			}
+
 			sqlite3_finalize(stmt);
 			for ( int i = 1; i <= count; i++ ) {
 				struct ctf currentCtf = returnCtf(i);
@@ -127,7 +126,7 @@ int main(int argc, char** argv) {
 			updateMainStoryById(mainStory, (int) strtol(id, (char **)NULL, 10));
 		}
 		int rc = sqlite3_exec(ppDb, newQuery, NULL, 0, &errorMessage);
-		if (rc != SQLITE_OK) {
+		if ( rc != SQLITE_OK ) {
 			printf("Error preparing query: %s \n", errorMessage);
 			return 1;
 		}
@@ -137,7 +136,7 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-int updateFlagById(const char* flag, int id){
+int updateFlagById(const char* flag, int id) {
 	
  	char query[MAX_LENGTH];
 	sprintf(query, "UPDATE ctfs "
@@ -149,7 +148,7 @@ int updateFlagById(const char* flag, int id){
 	char* errorMessage;
 
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error preparing query: %s \n", errorMessage);
 		return 1;
 	}
@@ -158,7 +157,7 @@ int updateFlagById(const char* flag, int id){
 
 }
 
-int updateMainStoryById(const char* main_story, int id){
+int updateMainStoryById(const char* main_story, int id) {
 	
  	char query[MAX_LENGTH];
 
@@ -171,7 +170,7 @@ int updateMainStoryById(const char* main_story, int id){
 	char* errorMessage;
 
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error preparing query: %s \n", errorMessage);
 		return 1;
 	}
@@ -193,7 +192,7 @@ int updateSolversById(int solvers, int id) {
 	char* errorMessage;
 
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error preparing query: %s \n", errorMessage);
 		return 1;
 	}
@@ -215,20 +214,20 @@ int openDBFile(const char* filename, const char* path) {
 
 	int fileExist = access(fullPath, 0);
 	int sqlite3Result = sqlite3_open(fullPath, &ppDb);
-	if (sqlite3Result != SQLITE_OK) {
+	if ( sqlite3Result != SQLITE_OK ) {
 		ppDb = NULL;
 		printf("Failed to open DB\n");
 		
 		return 1;
 	}
-	if (fileExist != 0) {
+	if ( fileExist != 0 )
 		return TableMaker();
-	}
+
 	sqlite3_open(fullPath, &ppDb); // for the possibility that its open and neither
 	return 0;
 }
 
-int TableMaker(){
+int TableMaker() {
 	const char* query = 
 		"CREATE TABLE IF NOT EXISTS ctfs ("
 		"id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -239,7 +238,7 @@ int TableMaker(){
 	char* errorMessage;
 
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error creating table: %s \n", errorMessage);
 		return 1;
 	}
@@ -253,7 +252,7 @@ int deleteChallengeById(int id) {
 
 	sprintf(query, "DELETE FROM ctfs WHERE ID=%d", id);
 	int rc = sqlite3_exec(ppDb, query, NULL, 0, &errorMessage);
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error deleting challenge id %d\n", id);
 		return 1;
 	}
@@ -274,12 +273,12 @@ struct ctf returnCtf(int id) {
 	sqlite3_stmt* stmt;
 	int rc = sqlite3_prepare_v2(ppDb, query, -1, &stmt, NULL);
 
-	if (rc != SQLITE_OK) {
+	if ( rc != SQLITE_OK ) {
 		printf("Error preparing query: %s \n", sqlite3_errmsg(ppDb));
 		return result;
 	}
 	
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
+	if ( sqlite3_step(stmt) == SQLITE_ROW ) {
 		result.id = id;
 		strcpy(result.flag, (char*)(sqlite3_column_text(stmt, 0)));
 		result.solvers = sqlite3_column_int(stmt, 1);
